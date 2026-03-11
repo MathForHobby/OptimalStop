@@ -23,7 +23,7 @@ with st.sidebar:
     st.header("⚙️ 게임 설정")
     
     # 1. 후보 수 선택 옵션 추가
-    n_candidates = st.slider("후보 수 (n)", min_value=5, max_value=100, value=10, step=5)
+    n_candidates = st.slider("후보 수 (n)", min_value=5, max_value=50, value=10, step=5)
     
     mode = st.radio("모드 선택", ["(1) 개별 실습", "(2) 전원 동일 실습"])
     
@@ -38,7 +38,7 @@ with st.sidebar:
             random.seed(None)
             
         # 1~100 사이의 수 중 n개를 추출 (중복 없이)
-        st.session_state.permutation = random.sample(range(1, 101), n_candidates)
+        st.session_state.permutation = random.sample(range(1, 51), n_candidates)
         st.session_state.current_index = 0
         st.session_state.selected_candidate = None
         st.session_state.game_started = True
