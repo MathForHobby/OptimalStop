@@ -16,25 +16,29 @@ if 'permutation' not in st.session_state:
 
 # --- 제목 및 설명 ---
 st.title("🏹 비서 게임: 최적 정지 실습")
-st.write("1부터 50 사이의 숫자 10개가 무작위 순서로 나타납니다. 단 한 번의 선택 기회로 최고 숫자를 찾아보세요!")
+st.write("나타나는 숫자들 중 단 한 번의 선택으로 최고 숫자를 찾아보세요!")
 
-# --- 설정 섹션 ---
+# --- 설정 섹션 (사이드바) ---
 with st.sidebar:
     st.header("⚙️ 게임 설정")
+    
+    # 1. 후보 수 선택 옵션 추가
+    n_candidates = st.slider("후보 수 (n)", min_value=5, max_value=100, value=10, step=5)
+    
     mode = st.radio("모드 선택", ["(1) 개별 실습", "(2) 전원 동일 실습"])
     
     room_key = ""
     if mode == "(2) 전원 동일 실습":
-        room_key = st.text_input("방 코드 입력 (강연자가 안내한 코드)", "SAMU_2026")
+        room_key = st.text_input("방 코드 입력", "SAMU_2026")
     
     if st.button("🔄 게임 시작 / 초기화"):
-        # 초기화 로직
         if mode == "(2) 전원 동일 실습":
-            random.seed(room_key) # 방 코드를 시드로 사용해 순열 동기화
+            random.seed(f"{room_key}_{n_candidates}") # 방 코드와 n을 조합해 시드 생성
         else:
-            random.seed(None) # 완전 랜덤
+            random.seed(None)
             
-        st.session_state.permutation = random.sample(range(1, 51), 10)
+        # 1~100 사이의 수 중 n개를 추출 (중복 없이)
+        st.session_state.permutation = random.sample(range(1, 101), n_candidates)
         st.session_state.current_index = 0
         st.session_state.selected_candidate = None
         st.session_state.game_started = True
@@ -44,24 +48,28 @@ if st.session_state.game_started:
     n = len(st.session_state.permutation)
     idx = st.session_state.current_index
     
+    # 상단에 진행률 표시
+    progress = (idx + 1) / n
+    st.progress(progress)
+    st.write(f"현재 후보: {idx + 1} / {n}")
+    
     if st.session_state.selected_candidate is None and idx < n:
-        st.subheader(f"후보 {idx + 1} / {n}")
         current_val = st.session_state.permutation[idx]
         
-        # 큰 숫자로 표시
-        st.markdown(f"<h1 style='text-align: center; color: #FF4B4B;'>{current_val}</h1>", unsafe_allow_html=True)
+        # 숫자 강조
+        st.markdown(f"<h1 style='text-align: center; color: #FF4B4B; font-size: 100px;'>{current_val}</h1>", unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("👉 다음 후보 보기"):
+            if st.button("👉 다음 후보 (Skip)", use_container_width=True):
                 if idx < n - 1:
                     st.session_state.current_index += 1
                     st.rerun()
                 else:
-                    st.warning("마지막 후보입니다! 선택하거나 게임을 종료하세요.")
+                    st.warning("마지막 후보입니다!")
         
         with col2:
-            if st.button("✅ 이 사람을 선택!"):
+            if st.button("✅ 선택 (Pick!)", use_container_width=True, type="primary"):
                 st.session_state.selected_candidate = current_val
                 st.rerun()
                 
@@ -69,19 +77,18 @@ if st.session_state.game_started:
     elif st.session_state.selected_candidate is not None:
         max_val = max(st.session_state.permutation)
         st.success(f"당신의 선택: {st.session_state.selected_candidate}")
-        st.info(f"전체 후보 중 최고 숫자: {max_val}")
+        st.info(f"이번 판의 최고 숫자: {max_val}")
         
         if st.session_state.selected_candidate == max_val:
             st.balloons()
-            st.write("🎉 축하합니다! 최고의 비서를 찾으셨네요!")
+            st.markdown("### 🎉 축하합니다! 1등을 찾으셨네요!")
         else:
-            st.write("😅 아쉽습니다. 1등을 놓쳤네요.")
+            st.markdown(f"### 😅 아쉽습니다. 전체 {n}명 중 {st.session_state.permutation.index(max_val)+1}번째에 1등이 있었네요.")
             
-        # 전체 순열 공개
-        st.write("전체 순서:", st.session_state.permutation)
+        st.write("나타난 순서:", st.session_state.permutation)
         
     elif idx >= n:
-        st.error("아무도 선택하지 못한 채 모든 후보가 지나갔습니다. (파산!)")
+        st.error("모든 후보를 보내버렸습니다. (선택 실패!)")
         st.write("전체 순서:", st.session_state.permutation)
 
 else:
