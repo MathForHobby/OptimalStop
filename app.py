@@ -43,6 +43,10 @@ with st.sidebar:
         st.session_state.selected_candidate = None
         st.session_state.game_started = True
 
+    # --- 만든 이 표기 (사이드바 하단) ---
+        st.markdown("---")
+        st.caption("created by 김사무@취미로배우는수학")
+
 # --- 게임 진행 섹션 ---
 if st.session_state.game_started:
     n = len(st.session_state.permutation)
