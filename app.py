@@ -97,3 +97,7 @@ if st.session_state.game_started:
 
 else:
     st.info("왼쪽 사이드바에서 설정을 완료한 후 '게임 시작' 버튼을 눌러주세요.")
+
+# --- 만든 이 표기 (메인 화면 하단) ---
+st.markdown("---")
+st.markdown("<div style='text-align: right; color: gray; font-size: 0.8em;'>created by 김사무@취미로배우는수학</div>", unsafe_allow_html=True)
